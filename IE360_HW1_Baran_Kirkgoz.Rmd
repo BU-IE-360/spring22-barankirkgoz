@@ -1,0 +1,333 @@
+---
+title: 'IE 360 HW1 '
+author: "Baran Kırkgöz"
+date: '2022-04-14'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+In this homework different time series data are selected from <https://evds2.tcmb.gov.tr/> and related keyword data from <https://trends.google.com/trends> to analyze. From TCMB, US Dollar exchange rate, employment rate and clothing price index datas are chosen and from google trends search volume of "trendyol" keyword is selected.The datasets provide information from 01.2017 to 12.2021. The aim of this study is to investigate relationship between those datasets and the 2 questions are "Does changing in the dollar rate and employment rate effect clothing price index?" and "Is there any relation between clothing price index and 'trendyol' search volume on google?".
+
+Firstly, the required packages are downloaded.
+
+```{r, echo=TRUE}
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
+Then, data file (hw) is uploaded and the first column's data type is changed to date and others to numeric. By this way, it will be possible to group the data by year and it will be easier to plot them.
+
+```{r, echo=TRUE}
+library(readr)
+hw <- read_csv("hw.csv", col_types = cols(Date = col_date(format = "%m/%Y"), 
+    `TP YISGUCU2 G7` = col_number(), `TP DK USD A YTL` = col_number(), 
+    `TP FG J031` = col_number()))
+```
+
+After organizing data types of columns, data is checked to see if there is any unrelated rows. As there can be seen, the rows after 61 are not relavent.
+
+```{r, echo=TRUE}
+str(hw)
+```
+
+Irrelavent rows are cleaned and the column names are changed to make them more understandable.
+
+```{r hw1}
+data<-hw[-c(61:82),]
+colnames(data)<-c("date","employment.rate","usd","clothing")
+```
+
+Then a year column is added to data so that it can be visualized by years (A function from lubridate package is used).
+
+```{r hw2}
+data$Year<- year(data$date)
+data
+```
+
+Before going into analyzing relationships, 4 different datas will be visualized indivisually.
+
+## USD
+
+### Line Graph
+
+Firstly, the line graph is created to observe the pattern. As there can be seen easily, there is a strong trend in data especially after 2020. This is related to economic crisis in Turkey. 
+
+```{r , echo=TRUE}
+ggplot(data=data, aes(x=date, y=usd, group=1)) +
+  geom_line()+
+  geom_point()
+
+```
+
+### Box plot
+
+As there can be seen, the mean of the data always increases. To investigate deeper, mean values will be analyzed below. And also the standard deviation of every year is increasing slightly. IT will be analyzed too (functions from dplyr are used).
+
+```{r , echo=TRUE}
+ggplot(data, aes(y=usd, fill=factor(Year))) +
+  geom_boxplot()
+
+```
+
+The means of the last 2 years are quite high.
+
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(mean_var = mean(usd))
+
+```
+
+The sd of last year is very high due to the jump in dollar rate in last months.
+
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(sd_var = sd(usd))
+
+```
+
+### Histogram
+
+The shape of histograms change every year. There is a high fluctuation.
+
+```{r , echo=TRUE}
+ggplot(data, aes(x = usd)) +
+  geom_histogram(fill = "pink", colour = "black") +
+  facet_grid(Year ~ ., scales = "free") 
+
+```
+
+## Employment Rate
+
+### Line Graph
+
+There is no obvious trend or seasonality in the data but at the beginning of the 2020, employment rate falls deeply, this is related to beginning of the pandemic.
+
+```{r , echo=TRUE}
+ggplot(data=data, aes(x=date, y=employment.rate, group=1)) +
+  geom_line()+
+  geom_point()
+
+```
+
+### Box Plot
+
+Except 2020, the means are very close. 
+
+```{r , echo=TRUE}
+ggplot(data, aes(y=employment.rate, fill=factor(Year))) +
+  geom_boxplot()
+
+```
+
+As there can be seen below, means are very close except 2020. In 2020, it is very low.
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(mean_var = mean(employment.rate))
+
+```
+
+The highest deviation belongs to year 2021, it is because pandemic started loose its affect and people started to get back their normal lifes.Because of that employment rate increases from beginning of 2021 till end of the year. This is why standard deviation is relatively high.
+
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(sd_var = sd(employment.rate))
+
+```
+
+### Histograms
+
+The histograms' shape are quite similar except 2020.
+
+```{r , echo=TRUE}
+ggplot(data, aes(x = employment.rate)) +
+  geom_histogram(fill = "green", colour = "black") +
+  facet_grid(Year ~ ., scales = "free") 
+```
+
+## Clothing Price Index
+
+### Line Graph
+
+There is a strong increasing trend and also strong seasonality. The graph looks very similar to usd's line graph. This can be a significant evidance to a relationship between these datasets.
+
+```{r , echo=TRUE}
+ggplot(data=data, aes(x=date, y=clothing, group=1)) +
+  geom_line()+
+  geom_point()
+```
+
+### Box Plot
+
+Means are increasing and deviations looks similar. 
+
+```{r , echo=TRUE}
+ggplot(data, aes(y=clothing, fill=factor(Year))) +
+  geom_boxplot()
+```
+
+As there can be seen, clothing price index increases every year on average.
+
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(mean_var = mean(clothing))
+```
+
+Deviations are close. 
+
+```{r , echo=TRUE}
+data %>%
+  mutate(year = year(date)) %>%
+  group_by(year) %>%
+  summarise(sd_var = sd(clothing))
+```
+
+
+### Histograms 
+
+Also the histogram is very similar to usd's. There is a high fluctuation.
+```{r , echo=TRUE}
+ggplot(data, aes(x = clothing)) +
+  geom_histogram(fill = "red", colour = "black") +
+  facet_grid(Year ~ ., scales = "free") 
+
+```
+
+## Google trends data
+
+Now the search volume of keyword "trendyol" will be analyzed. Again, the data is prepared to deep analyze firstly. The data types are changed and year column is added. And also the name of the columns is Date and "trendol". The typo is to prevent the confusion between the name of the dataset and variable.
+
+```{r , echo=TRUE}
+library(readr)
+trendyol <- read_csv("multiTimeline (3).csv", 
+    col_types = cols(Date = col_date(format = "%m/%Y"), 
+        trendol = col_number()))
+trendyol$Year<- year(trendyol$Date)
+
+trendyol
+```
+
+### Line graph
+
+There is an increasing trend and also seasonality in the data. As there can be seen, at the beginng of every year, volume is at maximum.
+
+```{r , echo=TRUE}
+ggplot(data=trendyol, aes(x=Date, y=trendol, group=1)) +
+  geom_line()+
+  geom_point()
+
+```
+
+### Box Plot
+
+The means of the years increases every year except the last one. It can be caused by "back to normal life after covid". People started to shop offline again.
+
+```{r , echo=TRUE}
+ggplot(trendyol, aes(y=trendol, fill=factor(Year))) +
+  geom_boxplot()
+
+```
+
+Max mean belongs to 2020. It is because people were stucked at their home and there was no way but online shopping. 
+
+```{r , echo=TRUE}
+trendyol %>%
+  mutate(year = year(Date)) %>%
+  group_by(year) %>%
+  summarise(mean_var = mean(trendol))
+
+```
+
+
+The high sd in 2019 is related to big jump in the beginning of the year, and sd in 2020 is related to covid.
+
+```{r , echo=TRUE}
+trendyol %>%
+  mutate(year = year(Date)) %>%
+  group_by(year) %>%
+  summarise(sd_var = sd(trendol))
+
+```
+
+### Histogram
+
+Histograms are similar to usds' and clothing price indexes' histograms. This can be an evidence for an relationship.
+
+```{r , echo=TRUE}
+ggplot(trendyol, aes(x = trendol)) +
+  geom_histogram(fill = "blue", colour = "black") +
+  facet_grid(Year ~ ., scales = "free") 
+
+```
+
+## Second Part: Analyzing Relations
+
+In this second part of homework, the relations between datasets will be analyzed. It will be done by using correlation. Correlation coefficients are indicators of the strength of the linear relationship between two different variables, x and y (investopedia.com). So if there is any relationship between two datasets, correlation coefficient will be close to -1 or 1. If there is no/weak relation between datasets, it will be close to 0.
+
+#### Correlation between usd and clothing
+
+From above graphs it is observed that there can be a relation between usd exchange rate and clothing price index. This high correlation proves that there is a strong relationship between those. 
+
+```{r , echo=TRUE}
+ 
+cor.test(x = data$usd, y = data$clothing, method = "pearson", alternative = "greater")
+
+```
+
+#### Correlation between employment rate and clothing
+
+Between employment rate and clothing there is a negative correlation regarding to these calculation. It does makes sense because falling in the employment rate is a signal to problems in the economy and than can cause to increasing clothing price index.
+
+```{r , echo=TRUE}
+ 
+cor.test(x = data$employment.rate, y = data$clothing, method = "pearson", alternative = "greater")
+
+```
+
+#### Correlation between trendyol and clothing
+
+From the graphs it is observed that patterns of trendyol search volume and clothing price index are similar. Since correlation values is high, it could be said that there is a positive relationship between trendyol search volume and clothing price index.
+
+```{r , echo=TRUE}
+ cor.test(x = trendyol$trendol, y = data$clothing, method = "pearson", alternative = "greater")
+
+```
+
+### Pairwise Scatter Plot
+
+In the last step, the pairwise scatter plots for each dataset duals are created to see the relations visually. 
+
+```{r , echo=TRUE}
+ par(mfrow=c(1,3))
+plot(x = data$usd,y = data$clothing,
+     main = "USD Exchange Rate vs. Clothing Price Index",
+     xlab = "USD Exchange Rate", ylab = " Clothing Price Index(%)",
+     sub = "Correlation: 89.84%", col="pink")
+plot(x = data$employment.rate,y = data$clothing,
+     main = "Employment Rate vs. Clothing Price Index",
+     xlab = "Employment Rate", ylab = "Clothing Price Index",
+     sub = "Correlation: -30.49%", col="green")
+plot(x = trendyol$trendol,y = data$clothing,
+     main = "Trendyol Search Volume vs. Clothing Price Index",
+     xlab = "Trendyol Search Volume", ylab = "Clothing Price Index",
+     sub = "Correlation: 74.42%", col = "blue")
+
+
+```
+
+In the first and third graphs, positive relationship is very strong. In the middle, the negative relation can be observed but it is weaker then first and third ones.
+
+## Conclusion
+
+It is proved that there is a relation between clothing price index data and other datasets. That means a linear regression model can be created to predict clothing price index by using trendyol search volume, employment rate and usd dollar exchange rate.
