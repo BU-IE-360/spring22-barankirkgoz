@@ -7,4 +7,4 @@ This is the 1st homework which 4 datasets are analyzed and the relations between
 
 [here](https://bu-ie-360.github.io/spring22-barankirkgoz/IE360_HW1_Baran_Kirkgoz.pdf) is the pdf for hw1.
 
-
+[here](https://bu-ie-360.github.io/spring22-barankirkgoz/IE360_HW1_Baran_Kirkgoz.Rmd) is the Rmd file for hw1.
