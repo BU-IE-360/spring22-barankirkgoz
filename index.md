@@ -12,3 +12,7 @@ This is the 1st homework which 4 datasets are analyzed and the relations between
 ### Homework2
 
 [here](https://bu-ie-360.github.io/spring22-barankirkgoz/hw2final.html) is the html for the hw2.
+
+## Project
+[here](https://bu-ie-360.github.io/spring22-barankirkgoz/Project_Report.html) is the html.
+[here](https://bu-ie-360.github.io/spring22-barankirkgoz/Project_Report.pdf) is the pdf.
